@@ -10,7 +10,7 @@
             "request": "launch",
             "module": "jotter",
             "justMyCode": true,
-            "args": ["--help"]
+            "args": ["init", "-db", "${workspaceFolder}/tests/jotter_test_db.json"]
         }
     ]
 }

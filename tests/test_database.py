@@ -1,8 +1,15 @@
-from jotter import database
+from jotter import database, jotter
 from datetime import datetime
+import os
+from typer.testing import CliRunner
+
+from tests import TEST_DB_FILE_LOCATION
+
+runner = CliRunner()
 
 
 def test_saveNote():
+    runner.invoke(jotter.app, ["init", "-db", str(TEST_DB_FILE_LOCATION)])
     new_note = {
         "title": "my dawg",
         "body": "my dawggiee babyyyy",
