@@ -8,6 +8,8 @@ from jotter import ERRORS, __app_name__, config, database
 
 app = typer.Typer()
 
+print("[red]Hello [bold-red]YOU[/bold-red][/red]")
+
 
 @app.command()
 def init(
@@ -23,17 +25,16 @@ def init(
     # initialize config
     app_init_error = config.init_app(db_path)
     if app_init_error:
-        typer.secho(
-            f'Creating config file failed with "{ERRORS[app_init_error]}"',
-            fg=typer.colors.RED,
+        print(
+            f'[red]Creating config file failed with "{ERRORS[app_init_error]}"[/red]',
         )
         raise typer.Exit(1)
     db_init_error = database.init_database(Path(db_path))
     if db_init_error:
-        typer.secho(f"Creating database failed ")
+        print(f'[red]Creating database failed with "{ERRORS[db_init_error]}"[/red]')
         raise typer.Exit(1)
     else:
-        typer.secho(f"The to-do database is: {db_path}", fg=typer.colors.GREEN)
+        print(f"[green]The to-do database is: {db_path}[/green]")
 
 
 @app.command()
