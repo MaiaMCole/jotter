@@ -1,0 +1,14 @@
+[
+    {
+        "title": "first note",
+        "body": "A short note.",
+        "tags": ["first", "short"],
+        "created": "2023-8-14"
+    },
+    {
+        "title": "second note",
+        "body": "A short note.",
+        "tags": ["second", "short"],
+        "created": "2023-9-14"
+    }
+]
