@@ -1,3 +1,4 @@
 from pathlib import Path
 
-TEST_DB_FILE_LOCATION = Path(__file__).parent.joinpath("jotter_test_db.json")
+TEST_DIRECTORY = Path(__file__).parent
+TEST_DB_FILE_LOCATION = TEST_DIRECTORY.joinpath("jotter_test_db.json")
