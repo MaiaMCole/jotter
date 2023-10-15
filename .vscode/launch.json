@@ -4,14 +4,26 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-        
+        {
+            "name": "Run Pytest",
+            "type": "python",
+            "request": "launch",
+            "module": "pytest",
+            "justMyCode": true,
+            "args": ["tests/test_database.py"]
+        },
         {
             "name": "Start Jotter",
             "type": "python",
             "request": "launch",
             "module": "jotter",
             "justMyCode": true,
-            "args": ["init", "-db", "${workspaceFolder}/tests/jotter_test_db.json"]
+            "args": [
+                "filter-notes",
+                "--created",
+                "2023-10-15"
+            ]
+            // "args": ["init", "-db", "${workspaceFolder}/tests/jotter_test_db.json"]
         }
     ]
 }
