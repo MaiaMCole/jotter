@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 from datetime import datetime
 
-from jotter import config, SUCCESS, DB_WRITE_ERROR
+from jotter import config, SUCCESS, DB_WRITE_ERROR, NO_NOTE_ERROR
 
 DEFAULT_DB_FILE_PATH = Path.home().joinpath(f".{Path.home().stem}_jotter_db.json")
 
@@ -65,14 +65,14 @@ def addnote(newnote: dict[str, any]) -> Notes:
         return writenotes(read_notes)
 
 
-def selectnotes(query: dict[str, any]) -> Notes:
-    selected_notes: dict = {}
+def filternotes(query: dict[str, any]) -> Notes:
+    selected_notes_dict = {}
     db_notes = getnotes()
 
     # add to a dictionary, overwriting a key so that no duplicates are included.
     def select_this_note(note: dict[str, any]):
         noteIndex = db_notes.notes.index(note)
-        selected_notes[noteIndex] = note
+        selected_notes_dict[noteIndex] = note
 
     # first check if reading db was successful
     if db_notes.return_code != SUCCESS:
@@ -88,32 +88,59 @@ def selectnotes(query: dict[str, any]) -> Notes:
                         noteTags = note.get("tags", None)
                         if noteTags is not None and tag in noteTags:
                             select_this_note(note)
-            if type == "created" or type == "edited":
-                queryDate = datetime.strptime(value, "%Y-%m-%d")
+            elif type == "created" or type == "edited":
+                # value in this case is already a datetime object
                 for note in db_notes.notes:
                     dateKey = note.get(type, None)
-                    if dateKey is not None and queryDate == datetime.strptime(
+                    if dateKey is not None and value == datetime.strptime(
                         dateKey, "%Y-%m-%d"
                     ):
                         select_this_note(note)
             # l
             else:
                 for note in db_notes.notes:
-                    noteValue = note.get(type, None)
-                    if value in noteValue:
+                    noteValue = note[type]
+                    if value.lower() in noteValue.lower():
                         select_this_note(note)
-
-    return Notes(db_notes.return_code, list(selected_notes.values()))
+    selected_notes_list = []
+    for noteIndex, note in selected_notes_dict.items():
+        note["note_index"] = noteIndex
+        selected_notes_list.append(note)
+    return Notes(db_notes.return_code, list(selected_notes_list))
 
 
 def editnote(note_args: dict[str, any]) -> Notes:
-    # note_args must contain a note_number: int
-    pass
+    note_index = note_args["note_number"] - 1
+    del note_args["note_number"]
+    note_args["edited"] = datetime.now().date().isoformat()
+    db_notes = getnotes()
+    if db_notes.return_code != SUCCESS:
+        return db_notes
+    try:
+        for key, value in note_args.items():
+            db_notes.notes[note_index][key] = value
+        return writenotes(db_notes)
+    except IndexError:
+        return Notes(NO_NOTE_ERROR)
 
 
 def selectnote(note_number: int) -> Note:
-    pass
+    note_index = note_number - 1
+    db_notes = getnotes()
+    if db_notes.return_code != SUCCESS:
+        return db_notes
+    try:
+        selected_note = db_notes.notes[note_index]
+        return Note(SUCCESS, selected_note)
+    except IndexError:
+        return Note(NO_NOTE_ERROR)
 
 
 def deletenote(note_number: int) -> Notes:
-    pass
+    note_index = note_number - 1
+    db_notes = getnotes()
+    try:
+        db_notes.notes.pop(note_index)
+        return writenotes(db_notes)
+    except IndexError:
+        return Note(NO_NOTE_ERROR)

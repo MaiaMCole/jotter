@@ -28,21 +28,21 @@ def test_savenote_notecount():
     assert len(newNotes.notes) == len(oldNotes.notes) + 1
 
 
-def test_selectnotes():
+def test_filternotes():
     with open(TEST_DIRECTORY.joinpath("jotter_test_data.json"), "r") as jsonIn:
         testData = json.load(jsonIn)
         for data in testData:
             database.addnote(data)
         # should retrieve 1 notes
-        selection1 = database.selectnotes({"title": "first"})
+        selection1 = database.filternotes({"title": "first"})
         # should retrieve 2 notes
-        selection2 = database.selectnotes({"title": "note"})
+        selection2 = database.filternotes({"title": "note"})
         # should retrieve 2 notes
-        selection3 = database.selectnotes({"tags": ["short"]})
+        selection3 = database.filternotes({"tags": ["short"]})
         # should retrieve 1 notes
-        selection4 = database.selectnotes({"tags": "second", "created": "2000-1-1"})
+        selection4 = database.filternotes({"tags": ["second"], "created": "2000-1-1"})
         # should retrieve 0 notes
-        selection5 = database.selectnotes({"created": "2000-1-1"})
+        selection5 = database.filternotes({"created": "2000-1-1"})
 
         assert len(selection1.notes) == 1
         assert len(selection2.notes) == 2
@@ -71,7 +71,7 @@ def test_editnote_notecount():
     notes_after_edit = database.editnote(
         {"note_number": note_number, "title": "A changed title"}
     )
-    assert len(notes_before_edit) == len(notes_after_edit)
+    assert len(notes_before_edit.notes) == len(notes_after_edit.notes)
 
 
 def test_editnote_edited():
@@ -81,8 +81,8 @@ def test_editnote_edited():
     note_before_edit = database.selectnote(note_number)
     database.editnote({"note_number": note_number, "title": "A changed title"})
     note_after_edit = database.selectnote(note_number)
-    assert note_after_edit != note_before_edit
-    assert note_before_edit.note.get("edited", None)
+    assert note_after_edit.note != note_before_edit.note
+    assert note_before_edit.note.get("edited", None) is None
     assert note_before_edit.note.get("created", None) == note_after_edit.note.get(
         "created", None
     )

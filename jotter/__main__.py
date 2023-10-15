@@ -1,9 +1,9 @@
 """Jotter Notes entry point script."""
-from jotter import jotter
+from jotter.jotter import app
 
 
 def main():
-    jotter.app()
+    app()
 
 
 if __name__ == "__main__":
