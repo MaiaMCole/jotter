@@ -146,7 +146,7 @@ def delete_note(
     ]
 ):
     db_notes = database.deletenote(note_number)
-    md = printer.markdown_note(db_notes)
+    md = printer.markdown_notes(db_notes)
     console.print(md)
 
 
