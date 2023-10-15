@@ -52,7 +52,9 @@ def new_note(
 
 @app.command()
 def edit_note(
-    note: Annotated[int, typer.Argument(help="number of the note you want to edit.")],
+    note_number: Annotated[
+        int, typer.Argument(help="number of the note you want to edit.")
+    ],
     body: Annotated[str, typer.Option(help="The new body of the note.")] = None,
     title: Annotated[str, typer.Option(help="The new title for the note.")] = None,
     tags: Annotated[
@@ -61,20 +63,7 @@ def edit_note(
     ] = None,
 ):
     """Edit a note in the database."""
-    # TODO:
-    #   - select the note from the database
-    #   - gather input data into a dict (make a function for this)
-    #   - add/update "edited" to this dict of new data
-    #   - update the note from the database with the dict of new data
-    print(
-        {
-            "note": note,
-            "body": body,
-            "title": title,
-            "tags": tags,
-            "edited": datetime.now().date().isoformat(),
-        }
-    )
+    pass
 
 
 @app.command()
@@ -105,8 +94,10 @@ def list_notes(
 
 
 @app.command()
-def show_note(
-    note: Annotated[int, typer.Argument(help="Number of the note you want to show.")]
+def select_note(
+    note_number: Annotated[
+        int, typer.Argument(help="Number of the note you want to show.")
+    ]
 ):
     """Select a note to print its contents to the screen."""
     pass
@@ -114,7 +105,7 @@ def show_note(
 
 @app.command()
 def delete_note(
-    note: Annotated[
+    note_number: Annotated[
         int, typer.Argument(help="The number of the note you want to delete")
     ]
 ):

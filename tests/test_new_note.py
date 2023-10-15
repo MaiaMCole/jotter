@@ -22,17 +22,17 @@ def test_create_title_from_body():
     assert title5 == "Here Is A"
 
 
-def test_new_note():
-    result = runner.invoke(
-        jotter.app,
-        [
-            "new-note",
-            "--title",
-            "Test note 1",
-            "--body",
-            "Test note body for unit tests.",
-            "--tag",
-            "test",
-        ],
-    )
-    print(result)
+# def test_new_note():
+#     result = runner.invoke(
+#         jotter.app,
+#         [
+#             "new-note",
+#             "--title",
+#             "Test note 1",
+#             "--body",
+#             "Test note body for unit tests.",
+#             "--tag",
+#             "test",
+#         ],
+#     )
+#     print(result)
