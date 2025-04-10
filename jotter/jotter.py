@@ -40,7 +40,7 @@ def init(
         print(f'[red]Creating database failed with "{ERRORS[db_init_error]}"[/red]')
         raise typer.Exit(1)
     else:
-        print(f"[green]The note database is: {db_path}[/green]")
+        print(f"[green]The Jotter database has been created at: {db_path}[/green]")
 
 
 @app.command()
@@ -131,7 +131,7 @@ def filter_notes(
 def select_note(
     note_number: Annotated[
         int, typer.Argument(help="Number of the note you want to show.")
-    ]
+    ],
 ):
     """Select a note to print its contents to the screen."""
     db_note = database.selectnote(note_number)
@@ -143,7 +143,7 @@ def select_note(
 def delete_note(
     note_number: Annotated[
         int, typer.Argument(help="The number of the note you want to delete")
-    ]
+    ],
 ):
     db_notes = database.deletenote(note_number)
     md = printer.markdown_notes(db_notes)

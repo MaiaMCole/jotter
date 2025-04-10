@@ -5,4 +5,4 @@ IAVenv
 **/__pycache__/*
 *.pyc
 .pytest_cache/
-tests/jotter_test_db.json
+tests/jotter_test.db

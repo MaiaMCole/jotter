@@ -18,12 +18,13 @@
             "request": "launch",
             "module": "jotter",
             "justMyCode": true,
-            "args": [
-                "filter-notes",
-                "--created",
-                "2023-10-15"
-            ]
-            // "args": ["init", "-db", "${workspaceFolder}/tests/jotter_test_db.json"]
+            // "args": [
+            //     "filter-notes",
+            //     "--created",
+            //     "2023-10-15"
+            // ]
+            // "args": ["init", "-db", "${workspaceFolder}/tests/jotter_test.db"]
+            "args": ["list-notes"]
         }
     ]
 }

@@ -6,12 +6,13 @@
 
     - `python -m venv IAVenv`
 
-2. Install the dependencies.
+2. Install the dependencies and initialize.
 
     - `pip install -r requirements.txt`
+    - `python -m jotter init`
 
 
-## two ways to start the app
+## two ways to run the app
 
 1. in vscode everything should be ready to run the app by starting the debugger by selecting the "Start Jotter" option in 'run and debug'.
 

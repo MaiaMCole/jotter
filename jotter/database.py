@@ -1,12 +1,13 @@
 import configparser
 from typing import NamedTuple
 from pathlib import Path
+import sqlite3
 import json
 from datetime import datetime
 
-from jotter import config, SUCCESS, DB_WRITE_ERROR, NO_NOTE_ERROR
+from jotter import config, SUCCESS, DB_WRITE_ERROR, DB_READ_ERROR, NO_NOTE_ERROR
 
-DEFAULT_DB_FILE_PATH = Path.home().joinpath(f".{Path.home().stem}_jotter_db.json")
+DEFAULT_DB_FILE_PATH = Path.home().joinpath(f".{Path.home().stem}_jotter.db")
 
 
 class Note(NamedTuple):
@@ -26,21 +27,42 @@ def get_database_path() -> Path:
     return Path(config_parser["general"]["database"])
 
 
+def get_database_connection(db_path: Path) -> sqlite3.Cursor:
+    connection = sqlite3.connect(db_path)
+    cursor = connection.cursor()
+    return (connection, cursor)
+
+
 def init_database(db_path: Path) -> int:
     """Create the note database."""
     try:
-        db_path.write_text("[]")
-        return SUCCESS
+        connection, cursor = get_database_connection(db_path)
+        with connection:
+            cursor.execute(
+                "CREATE TABLE note (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, body TEXT NOT NULL, created TEXT NOT NULL, edited TEXT, tags TEXT);"
+            )
+            cursor.execute(
+                "CREATE TABLE person (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, mail TEXT NOT NULL);"
+            )
+            cursor.execute(
+                "CREATE TABLE share (id INTEGER PRIMARY KEY AUTOINCREMENT, note_id INTEGER NOT NULL, person_id INTEGER NOT NULL);"
+            )
+            now = datetime.now().date().isoformat()
+            cursor.execute(
+                f"INSERT INTO note (title, body, tags, created) VALUES('jotter 1', 'Welcome to Jotter! Try making some simple notes', 'welcome', '{now}');"
+            )
     except OSError:
         return DB_WRITE_ERROR
 
 
 def getnotes() -> Notes:
     database_file = get_database_path()
-    with database_file.open("r") as jsonIn:
+    connection, cursor = get_database_connection(database_file)
+    with connection:
         try:
-            notes: list = json.load(jsonIn)
-            return Notes(SUCCESS, notes)
+            res = cursor.execute("SELECT * FROM note;")
+            res.fetchall()
+            wait = True
         except OSError:
             return Notes(DB_WRITE_ERROR)
 
