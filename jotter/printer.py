@@ -11,7 +11,7 @@ def markdown_notes(notes: Notes) -> Markdown | Notes:
         for note in notes.notes:
             tags: list = note.get("tags", [" - "])
             values = [
-                notes.notes.index(note) + 1,
+                note["id"],
                 note["title"].title(),
                 note["body"][0:23] + "...",
                 ", ".join(tags),

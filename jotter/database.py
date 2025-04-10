@@ -10,6 +10,7 @@ from jotter import config, SUCCESS, DB_WRITE_ERROR, DB_READ_ERROR, NO_NOTE_ERROR
 DEFAULT_DB_FILE_PATH = Path.home().joinpath(f".{Path.home().stem}_jotter.db")
 
 
+# TODO: change note to use properties and notes to be a list of Note
 class Note(NamedTuple):
     return_code: int
     note: dict[str, any] = None
@@ -27,10 +28,27 @@ def get_database_path() -> Path:
     return Path(config_parser["general"]["database"])
 
 
-def get_database_connection(db_path: Path) -> sqlite3.Cursor:
+def get_database_connection(db_path: Path) -> tuple[sqlite3.Connection, sqlite3.Cursor]:
     connection = sqlite3.connect(db_path)
     cursor = connection.cursor()
     return (connection, cursor)
+
+
+def format_notes(db_notes: list[tuple]) -> list[dict]:
+    """Takes a list of tuples and returns a list of dict. The list of tuples MUST be SELECTed by sql to be in the order of 'id, title, body, tags, created, editied'."""
+    notes = []
+    for note in db_notes:
+        notes.append(
+            {
+                "id": note[0],
+                "title": note[1],
+                "body": note[2],
+                "tags": note[3].split(","),
+                "created": note[4],
+                "edited": note[5],
+            }
+        )
+    return notes
 
 
 def init_database(db_path: Path) -> int:
@@ -60,9 +78,12 @@ def getnotes() -> Notes:
     connection, cursor = get_database_connection(database_file)
     with connection:
         try:
-            res = cursor.execute("SELECT * FROM note;")
-            res.fetchall()
-            wait = True
+            res = cursor.execute(
+                "SELECT id, title, body, tags, created, edited FROM note;"
+            )
+            notes_db = res.fetchall()
+            notes = format_notes(notes_db)
+            return Notes(SUCCESS, notes)
         except OSError:
             return Notes(DB_WRITE_ERROR)
 
