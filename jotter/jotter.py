@@ -4,6 +4,7 @@ import typer
 from typing_extensions import Annotated
 from rich import print
 from rich.console import Console
+from jotter.models import Note
 
 from jotter import SUCCESS, ERRORS, __app_name__, config, database, printer, helpers
 
@@ -35,7 +36,8 @@ def init(
             f'[red]Creating config file failed with "{ERRORS[app_init_error]}"[/red]',
         )
         raise typer.Exit(1)
-    db_init_error = database.init_database(Path(db_path))
+    # db_init_error = database.init_database(Path(db_path))
+    db_init_error = database.init_database()
     if db_init_error:
         print(f'[red]Creating database failed with "{ERRORS[db_init_error]}"[/red]')
         raise typer.Exit(1)
@@ -66,8 +68,9 @@ def add_note(
         title = helpers.create_title_from_body(body)
 
     args_dictionary = helpers.create_args_dictionary(title=title, body=body, tags=tags)
-    db_notes = database.addnote(args_dictionary)
-    md = printer.markdown_notes(db_notes)
+
+    note = database.addnote(Note)
+    md = printer.markdown_notes(note)
     console.print(helpers.print_results(md))
 
 
@@ -117,13 +120,23 @@ def filter_notes(
             help="List all notes that were last edited on this date.",
         ),
     ] = None,
+    orderby: Annotated[
+        str, typer.Option(help="The field you want the results to be ordered by.")
+    ] = "created",
 ):
     """List all of your notes. Optionally filtering by --title, --body, --tags, --created, or --edited"""
     dictionary_args = helpers.create_args_dictionary(
-        body=body, title=title, tags=tags, created=created, edited=edited
+        body=body,
+        title=title,
+        tags=tags,
+        created=created,
+        edited=edited,
+        orderby=orderby,
     )
     db_notes = database.filternotes(dictionary_args)
-    md = printer.markdown_filtered_notes(db_notes)
+    # md = printer.markdown_filtered_notes(db_notes)
+    md = printer.markdown_notes(db_notes)
+
     console.print(helpers.print_results(md))
 
 

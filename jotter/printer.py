@@ -9,14 +9,13 @@ def markdown_notes(notes: Notes) -> Markdown | Notes:
         table = f"| note #{column_end} title{column_end} body{column_end} tags{column_end} created{column_end} edited{column_end}\n"
         table += "|---|---|---|---|---|---|\n"
         for note in notes.notes:
-            tags: list = note.get("tags", [" - "])
             values = [
-                note["id"],
-                note["title"].title(),
-                note["body"][0:23] + "...",
-                ", ".join(tags),
-                note.get("created", " - "),
-                note.get("edited", " - "),
+                note.id,
+                note.title.title(),
+                note.body[0:23] + "...",
+                note.tags,
+                note.created,
+                note.edited,
             ]
             row_text = "|"
             for value in values:

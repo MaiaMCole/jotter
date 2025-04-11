@@ -1,6 +1,7 @@
 from rich.markdown import Markdown
 from jotter import SUCCESS, ERRORS
-from jotter.database import Note, Notes
+from jotter.models import Note, Notes
+from datetime import datetime
 
 
 def create_title_from_body(body: str) -> str:
@@ -18,6 +19,12 @@ def create_args_dictionary(**kwargs) -> dict[str, any]:
     for key, value in kwargs.items():
         if value is not None:
             args_dictionary[key] = value
+    if (
+        args_dictionary.get("tags", None) is not None
+        and len(args_dictionary.get("tags", None)) == 0
+    ):
+        del args_dictionary["tags"]
+
     return args_dictionary
 
 
@@ -27,3 +34,8 @@ def print_results(results: Notes | Note | Markdown) -> str | Markdown:
         return f"[red-bold]{ERRORS[return_code]}[/red-bold]"
     except AttributeError:
         return results
+
+
+def now_iso() -> str:
+    now = datetime.now().isoformat()
+    return now.split(".")[0]
