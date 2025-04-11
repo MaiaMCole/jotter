@@ -2,9 +2,10 @@
 
 ## get started
 
-1. Create a python virtual env named IAVenv so that it matches the .gitignore file.
+1. Create a python virtual env named IAVenv so that it matches the .gitignore file and activate it.
 
     - `python -m venv IAVenv`
+    - `source ./IAVenv/bin/activate`
 
 2. Install the dependencies and initialize.
 
