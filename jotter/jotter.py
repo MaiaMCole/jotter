@@ -4,8 +4,8 @@ import typer
 from typing_extensions import Annotated
 from rich import print
 from rich.console import Console
-from jotter.models import Note
 
+from jotter.models import Note
 from jotter import SUCCESS, ERRORS, __app_name__, config, database, printer, helpers
 
 
@@ -68,9 +68,19 @@ def add_note(
         title = helpers.create_title_from_body(body)
 
     args_dictionary = helpers.create_args_dictionary(title=title, body=body, tags=tags)
-
-    note = database.addnote(Note)
-    md = printer.markdown_notes(note)
+    now = helpers.now_iso()
+    notes = database.addnote(
+        Note(
+            return_code=SUCCESS,
+            id=0,
+            title=title,
+            body=body,
+            tags=tags,
+            created=now,
+            edited=now,
+        )
+    )
+    md = printer.markdown_notes(notes)
     console.print(helpers.print_results(md))
 
 
@@ -87,11 +97,14 @@ def edit_note(
     ] = None,
 ):
     """Edit a note in the database."""
+    if len(tags) == 0:
+        tags = None
     dictionary_args = helpers.create_args_dictionary(
         note_number=note_number,
         body=body,
         title=title,
         tags=tags,
+        edited=helpers.now_iso(),
     )
     db_notes = database.editnote(dictionary_args)
     md = printer.markdown_notes(db_notes)
@@ -149,7 +162,7 @@ def select_note(
     """Select a note to print its contents to the screen."""
     db_note = database.selectnote(note_number)
     md = printer.markdown_note(db_note)
-    console.print(md)
+    console.print(helpers.print_results(md))
 
 
 @app.command()

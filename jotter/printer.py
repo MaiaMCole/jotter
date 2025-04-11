@@ -56,12 +56,10 @@ def markdown_note(note: Note) -> Markdown | Note:
     if note.return_code != SUCCESS:
         return note
     else:
-        tags = note.note.get("tags", [" - "])
-        edited = note.note.get("edited", " - ")
-        note_text = f"# {note.note['title']}\n\n"
-        note_text += note.note["body"] + "\n\n---\n\n"
-        note_text += f"tags: {', '.join(tags)} | "
-        note_text += f"created: {note.note['created']} | "
-        note_text += f"edited: {edited}\n\n---\n\n"
+        note_text = f"# {note.title}\n\n"
+        note_text += note.body + "\n\n---\n\n"
+        note_text += f"tags: {', '.join(note.tags)} | "
+        note_text += f"created: {note.created} | "
+        note_text += f"edited: {note.edited}\n\n---\n\n"
         md = Markdown(note_text)
         return md

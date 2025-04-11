@@ -18,13 +18,14 @@
             "request": "launch",
             "module": "jotter",
             "justMyCode": true,
-            "args": [
-                "filter-notes",
-                "--title",
-                "1",
-                "--tag",
-                "Welcome"
-            ]
+            "args": ["edit-note", "2", "--tag", "edited"]
+            // "args": [
+            //     "filter-notes",
+            //     "--title",
+            //     "1",
+            //     "--tag",
+            //     "Welcome"
+            // ]
             // "args": ["init", "-db", "${workspaceFolder}/tests/jotter_test.db"]
             // "args": ["list-notes"]
         }

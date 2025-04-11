@@ -24,21 +24,23 @@ def get_database_connection() -> tuple[sqlite3.Connection, sqlite3.Cursor]:
     return (connection, cursor)
 
 
+def instantiate_note(db_note: tuple) -> Note:
+    return Note(
+        return_code=SUCCESS,
+        id=db_note[0],
+        title=db_note[1],
+        body=db_note[2],
+        tags=db_note[3].split(","),
+        created=db_note[4],
+        edited=db_note[5],
+    )
+
+
 def instantiate_notes(db_notes: list[tuple]) -> list[dict]:
     """Takes a list of tuples and returns a list of dict. The list of tuples MUST be SELECTed by sql to be in the order of 'id, title, body, tags, created, editied'."""
     notes = []
     for note in db_notes:
-        notes.append(
-            Note(
-                return_code=SUCCESS,
-                id=note[0],
-                title=note[1],
-                body=note[2],
-                tags=note[3].split(","),
-                created=note[4],
-                edited=note[5],
-            )
-        )
+        notes.append(instantiate_note(note))
     return notes
 
 
@@ -106,7 +108,8 @@ def addnote(newnote: Note) -> Notes:
     with connection:
         sql = "INSERT INTO note (title, body, tags, created) VALUES(?, ?, ?, ?)"
         data = (newnote.title, newnote.body, ",".join(newnote.tags), newnote.created)
-        cursor.execute(sql, data)
+        res = cursor.execute(sql, data)
+    return getnotes()
 
 
 def filternotes(query: dict[str, any]) -> Notes:
@@ -186,37 +189,84 @@ def filternotes(query: dict[str, any]) -> Notes:
 
 
 def editnote(note_args: dict[str, any]) -> Notes:
-    note_index = note_args["note_number"] - 1
+    note_number = note_args["note_number"]
     del note_args["note_number"]
-    note_args["edited"] = datetime.now().date().isoformat()
-    db_notes = getnotes()
-    if db_notes.return_code != SUCCESS:
-        return db_notes
-    try:
-        for key, value in note_args.items():
-            db_notes.notes[note_index][key] = value
-        return writenotes(db_notes)
-    except IndexError:
-        return Notes(NO_NOTE_ERROR)
+    test = selectnote(note_number)
+    if test.return_code != SUCCESS:
+        return test
+    setText = ""
+    commaIndex = 1
+    for field, value in note_args.items():
+        commaText = ", " if commaIndex < len(note_args) else ""
+
+        if field == "tags":
+            if len(test.tags) == 1 and test.tags[0] == "":
+                test.tags.pop()
+            tags = test.tags + value if len(test.tags) > 0 else value
+            setText += f"{field} = '{",".join(tags)}'{commaText}"
+        else:
+            setText += f"{field} = '{value}'{commaText}"
+        commaIndex += 1
+    sql = f"UPDATE note SET {setText} WHERE id = {note_number};"
+    connection, cursor = get_database_connection()
+    with connection:
+        try:
+            cursor.execute(sql)
+        except OSError:
+            return Note(
+                return_code=DB_WRITE_ERROR,
+                id=0,
+                title="",
+                body="",
+                tags=[],
+                created="",
+                edited="",
+            )
+    return getnotes()
 
 
 def selectnote(note_number: int) -> Note:
-    note_index = note_number - 1
-    db_notes = getnotes()
-    if db_notes.return_code != SUCCESS:
-        return db_notes
-    try:
-        selected_note = db_notes.notes[note_index]
-        return Note(SUCCESS, selected_note)
-    except IndexError:
-        return Note(NO_NOTE_ERROR)
+    sql = f"SELECT id, title, body, tags, created, edited from note WHERE id = {note_number}"
+    connection, cursor = get_database_connection()
+    with connection:
+        try:
+            res = cursor.execute(sql)
+            db_note = res.fetchone()
+            if db_note is not None:
+                note = instantiate_note(db_note)
+                return note
+            else:
+                return Note(
+                    return_code=NO_NOTE_ERROR,
+                    id=0,
+                    title="",
+                    body="",
+                    tags=[],
+                    created="",
+                    edited="",
+                )
+
+        except IndexError:
+            return Note(
+                return_code=NO_NOTE_ERROR,
+                id=0,
+                title="",
+                body="",
+                tags=[],
+                created="",
+                edited="",
+            )
 
 
 def deletenote(note_number: int) -> Notes:
-    note_index = note_number - 1
-    db_notes = getnotes()
+    connection, cursor = get_database_connection()
+    sql = f"DELETE from note WHERE id = {note_number}"
     try:
-        db_notes.notes.pop(note_index)
-        return writenotes(db_notes)
+        with connection:
+            res = cursor.execute(sql)
+            wait = None
     except IndexError:
         return Note(NO_NOTE_ERROR)
+
+    else:
+        return getnotes()
